@@ -1,3 +1,5 @@
+name: CD Pipeline
+
 on:
   workflow_run:
     workflows: ["CI Pipeline"]
@@ -9,56 +11,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up deployment hosts
-        id: setup_hosts
+      - name: Determine Deployment Environment
+        id: set-env
         run: |
-          echo "::set-output name=prod_hosts::${{secrets.EC2_HOSTPROD}}"
-          echo "::set-output name=qa_hosts::${{secrets.EC2_HOSTSQA}}"
+          if [[ "${{github.event.workflow_run.head_branch}}" == "QA" ]]; then
+            echo "environment=QA" >> $GITHUB_ENV
+            echo "hosts=${{secrets.EC2_HOSTSQA}}" >> $GITHUB_ENV
+            echo "key=${{secrets.EC2_KEYQA}}" >> $GITHUB_ENV
+            echo "tag=qa" >> $GITHUB_ENV
+          elif [[ "${{github.event.workflow_run.head_branch}}" == "main" ]]; then
+            echo "environment=Production" >> $GITHUB_ENV
+            echo "hosts=${{secrets.EC2_HOSTPROD}}" >> $GITHUB_ENV
+            echo "key=${{secrets.EC2_KEY}}" >> $GITHUB_ENV
+            echo "tag=prod" >> $GITHUB_ENV
+          else
+            echo "Unknown branch, skipping deployment."
+            exit 1
+          fi
 
-      - name: Deploy to Production Instances
+      - name: Deploy to EC2 Instances
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{secrets.EC2_HOSTPROD}}
+          host: ${{ env.hosts }}
           username: ubuntu
-          key: ${{secrets.EC2_KEY}}
+          key: ${{ env.key }}
           script: |
-            if ! command -v docker &> /dev/null; then
-              sudo apt update
-              sudo apt install -y docker.io
-              sudo systemctl start docker
-              sudo systemctl enable docker
-              sudo usermod -aG docker $USER
-              sudo systemctl restart docker
-            fi
-            
-            if ! sudo systemctl is-active --quiet docker; then
-              sudo systemctl start docker
-            fi
-
-            sudo docker pull ${{secrets.DOCKER_USERNAME}}/lb_asg:latest
+            sudo docker pull ${{secrets.DOCKER_USERNAME}}/lb_asg:${{ env.tag }}
             sudo docker stop $(docker ps -q) || true
-            sudo docker run -d -p 80:80 ${{secrets.DOCKER_USERNAME}}/lb_asg:latest
-
-      - name: Deploy to QA Instances
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{secrets.EC2_HOSTSQA}}
-          username: ubuntu
-          key: ${{secrets.EC2_KEYQA}}
-          script: |
-            if ! command -v docker &> /dev/null; then
-              sudo apt update
-              sudo apt install -y docker.io
-              sudo systemctl start docker
-              sudo systemctl enable docker
-              sudo usermod -aG docker $USER
-              sudo systemctl restart docker
-            fi
-            
-            if ! sudo systemctl is-active --quiet docker; then
-              sudo systemctl start docker
-            fi
-
-            sudo docker pull ${{secrets.DOCKER_USERNAME}}/lb_asg:latest
-            sudo docker stop $(docker ps -q) || true
-            sudo docker run -d -p 80:80 ${{secrets.DOCKER_USERNAME}}/lb_asg:latest
+            sudo docker run -d -p 80:80 ${{secrets.DOCKER_USERNAME}}/lb_asg:${{ env.tag }}
