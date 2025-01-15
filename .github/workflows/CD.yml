@@ -14,12 +14,12 @@ jobs:
       - name: Determine Deployment Environment
         id: set-env
         run: |
-          if [[ "${{github.event.workflow_run.head_branch}}" == "QA" ]]; then
+          if [[ "${{github.event.workflow_run.base_ref}}" == "QA" ]]; then
             echo "environment=QA" >> $GITHUB_ENV
             echo "hosts=${{secrets.EC2_HOSTSQA}}" >> $GITHUB_ENV
             echo "key=${{secrets.EC2_KEYQA}}" >> $GITHUB_ENV
             echo "tag=qa" >> $GITHUB_ENV
-          elif [[ "${{github.event.workflow_run.head_branch}}" == "main" ]]; then
+          elif [[ "${{github.event.workflow_run.base_ref}}" == "main" ]]; then
             echo "environment=Production" >> $GITHUB_ENV
             echo "hosts=${{secrets.EC2_HOSTPROD}}" >> $GITHUB_ENV
             echo "key=${{secrets.EC2_KEY}}" >> $GITHUB_ENV
