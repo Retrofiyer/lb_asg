@@ -34,3 +34,7 @@ jobs:
           elif [[ "${{github.base_ref}}" == "main" ]]; then
             docker push ${{secrets.DOCKER_USERNAME}}/lb_asg:prod
           fi
+      
+      - name: Set Outputs for CD Pipeline
+        id: set-outputs
+        run: echo "base_ref=${{ github.base_ref }}" >> $GITHUB_ENV
