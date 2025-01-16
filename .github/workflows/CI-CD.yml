@@ -43,26 +43,18 @@ jobs:
         run: |
           if [[ "${{ github.event.pull_request.base.ref }}" == "QA" ]]; then
             echo "env=QA" >> $GITHUB_ENV
-            printf "host=%s\n" "${{ secrets.EC2_HOSTSQA }}" >> $GITHUB_ENV
-            printf "key_b64=%s\n" "$(echo "${{ secrets.EC2_KEYQA }}" | base64)" >> $GITHUB_ENV
+            echo "host=${{ secrets.EC2_HOSTSQA }}" >> $GITHUB_ENV
+            echo "key_b64=$(echo '${{ secrets.EC2_KEYQA }}' | base64 | tr -d '\n')" >> $GITHUB_ENV
             echo "image_tag=qa" >> $GITHUB_ENV
           elif [[ "${{ github.event.pull_request.base.ref }}" == "main" ]]; then
             echo "env=PROD" >> $GITHUB_ENV
-            printf "host=%s\n" "${{ secrets.EC2_HOSTPROD }}" >> $GITHUB_ENV
-            printf "key_b64=%s\n" "$(echo "${{ secrets.EC2_KEY }}" | base64)" >> $GITHUB_ENV
+            echo "host=${{ secrets.EC2_HOSTPROD }}" >> $GITHUB_ENV
+            echo "key_b64=$(echo '${{ secrets.EC2_KEY }}' | base64 | tr -d '\n')" >> $GITHUB_ENV
             echo "image_tag=prod" >> $GITHUB_ENV
           else
             echo "No valid branch detected for deployment."
             exit 1
           fi
-
-      - name: Debug Environment Variables
-        run: |
-          echo "Environment: $env"
-          echo "Host: $host"
-          echo "Key Length: ${#key}" # Muestra la longitud del valor de la clave
-          echo "Image Tag: $image_tag"
-
 
       - name: Write Private Key to File
         run: |
