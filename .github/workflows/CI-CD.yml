@@ -41,7 +41,6 @@ jobs:
 
       - name: Set Target Environment
         run: |
-        
           if [[ "${{ github.event.pull_request.base.ref }}" == "QA" ]]; then
             echo "env=QA" >> $GITHUB_ENV
             echo "host=${{ secrets.EC2_HOSTSQA }}" >> $GITHUB_ENV
@@ -56,6 +55,13 @@ jobs:
             echo "No valid branch detected for deployment."
             exit 1
           fi
+
+      - name: Debug Environment Variables
+        run: |
+          echo "Environment: $env"
+          echo "Host: $host"
+          echo "Key: $key"
+          echo "Image Tag: $image_tag"
 
       - name: SSH into EC2 and pull the latest Docker image
         uses: appleboy/ssh-action@v1.2.0
