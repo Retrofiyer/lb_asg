@@ -43,13 +43,13 @@ jobs:
         run: |
           if [[ "${{ github.event.pull_request.base.ref }}" == "QA" ]]; then
             echo "env=QA" >> $GITHUB_ENV
-            echo "host=${{ secrets.EC2_HOSTSQA }}" >> $GITHUB_ENV
-            echo "key=${{ secrets.EC2_KEYQA }}" >> $GITHUB_ENV
+            echo "host=${{ secrets.EC2_HOSTSQA }}" | tr -d '\n' >> $GITHUB_ENV
+            echo "key=${{ secrets.EC2_KEYQA }}" | tr -d '\n' >> $GITHUB_ENV
             echo "image_tag=qa" >> $GITHUB_ENV
           elif [[ "${{ github.event.pull_request.base.ref }}" == "main" ]]; then
             echo "env=PROD" >> $GITHUB_ENV
-            echo "host=${{ secrets.EC2_HOSTPROD }}" >> $GITHUB_ENV
-            echo "key=${{ secrets.EC2_KEY }}" >> $GITHUB_ENV
+            echo "host=${{ secrets.EC2_HOSTPROD }}" | tr -d '\n' >> $GITHUB_ENV
+            echo "key=${{ secrets.EC2_KEY }}" | tr -d '\n' >> $GITHUB_ENV
             echo "image_tag=prod" >> $GITHUB_ENV
           else
             echo "No valid branch detected for deployment."
