@@ -58,7 +58,7 @@ jobs:
           fi
 
       - name: Deploy to Target Environment
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.8.0
         with:
           host: ${{ env.host }}
           username: ubuntu
