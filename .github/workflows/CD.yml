@@ -13,16 +13,20 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-        
+      
+      - name: Extract Deployment Environment
+        run: |
+          echo "base_ref=${{ github.event.workflow_run.outputs.base_ref }}" >> $GITHUB_ENV
+
       - name: Determine Deployment Environment
         id: set-env
         run: |
-          if [[ "${{ github.event.inputs.base_ref }}" == "QA" ]]; then
+          if [[ "${{ env.base_ref }}" == "QA" ]]; then
             echo "environment=QA" >> $GITHUB_ENV
             echo "hosts=${{ secrets.EC2_HOSTSQA }}" >> $GITHUB_ENV
             echo "key=${{ secrets.EC2_KEYQA }}" >> $GITHUB_ENV
             echo "tag=qa" >> $GITHUB_ENV
-          elif [[ "${{ github.event.inputs.base_ref }}" == "main" ]]; then
+          elif [[ "${{ env.base_ref }}" == "main" ]]; then
             echo "environment=Production" >> $GITHUB_ENV
             echo "hosts=${{ secrets.EC2_HOSTPROD }}" >> $GITHUB_ENV
             echo "key=${{ secrets.EC2_KEY }}" >> $GITHUB_ENV
@@ -39,6 +43,6 @@ jobs:
           username: ubuntu
           key: ${{ env.key }}
           script: |
-            sudo docker pull ${{secrets.DOCKER_USERNAME}}/lb_asg:${{ env.tag }}
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lb_asg:${{ env.tag }}
             sudo docker stop $(docker ps -q) || true
-            sudo docker run -d -p 80:80 ${{secrets.DOCKER_USERNAME}}/lb_asg:${{ env.tag }}
+            sudo docker run -d -p 80:80 ${{ secrets.DOCKER_USERNAME }}/lb_asg:${{ env.tag }}
