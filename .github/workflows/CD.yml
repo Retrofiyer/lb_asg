@@ -7,38 +7,50 @@ on:
       - completed
 
 jobs:
-  deploy:
+  deploy-qa:
+    if: ${{ github.event.workflow_run.head_branch == 'dev' && github.event.workflow_run.event.pull_request.base.ref == 'QA' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Determine Deployment Environment
-        id: set-env
-        run: |
-          if [[ "${{ github.base_ref }}" == "QA" ]]; then
-            echo "environment=QA" >> $GITHUB_ENV
-            echo "hosts=${{ secrets.EC2_HOSTSQA }}" >> $GITHUB_ENV
-            echo "key=${{ secrets.EC2_KEYQA }}" >> $GITHUB_ENV
-            echo "tag=qa" >> $GITHUB_ENV
-          elif [[ "${{ github.base_ref }}" == "main" ]]; then
-            echo "environment=Production" >> $GITHUB_ENV
-            echo "hosts=${{ secrets.EC2_HOSTPROD }}" >> $GITHUB_ENV
-            echo "key=${{ secrets.EC2_KEY }}" >> $GITHUB_ENV
-            echo "tag=prod" >> $GITHUB_ENV
-          else
-            echo "Unknown branch, skipping deployment."
-            exit 1
-          fi
-
-      - name: Deploy to EC2 Instances
+      - name: Deploy to QA Instance
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ env.hosts }}
+          host: ${{ secrets.EC2_HOSTSQA }}
           username: ubuntu
-          key: ${{ env.key }}
+          key: ${{ secrets.EC2_KEYQA }}
           script: |
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lb_asg:${{ env.tag }}
+            if ! command -v docker &> /dev/null; then
+              sudo apt update
+              sudo apt install -y docker.io
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              sudo usermod -aG docker $USER
+              sudo systemctl restart docker
+            fi
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lb_asg:qa
             sudo docker stop $(docker ps -q) || true
-            sudo docker run -d -p 80:80 ${{ secrets.DOCKER_USERNAME }}/lb_asg:${{ env.tag }}
+            sudo docker run -d -p 80:80 ${{ secrets.DOCKER_USERNAME }}/lb_asg:qa
+
+  deploy-prod:
+    if: ${{ github.event.workflow_run.head_branch == 'dev' && github.event.workflow_run.event.pull_request.base.ref == 'main' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Production Instance
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOSTPROD }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            if ! command -v docker &> /dev/null; then
+              sudo apt update
+              sudo apt install -y docker.io
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              sudo usermod -aG docker $USER
+              sudo systemctl restart docker
+            fi
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lb_asg:prod
+            sudo docker stop $(docker ps -q) || true
+            sudo docker run -d -p 80:80 ${{ secrets.DOCKER_USERNAME }}/lb_asg:prod
