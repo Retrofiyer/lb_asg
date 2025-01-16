@@ -15,26 +15,26 @@ jobs:
 
       - name: Login to Docker Hub
         env:
-          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
-          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
       - name: Build and Tag the Docker Image
         run: |
-          if [[ "${{github.base_ref}}" == "QA" ]]; then
-            docker build -t ${{secrets.DOCKER_USERNAME}}/lb_asg:qa .
-          elif [[ "${{github.base_ref}}" == "main" ]]; then
-            docker build -t ${{secrets.DOCKER_USERNAME}}/lb_asg:prod .
+          if [[ "${{ github.base_ref }}" == "QA" ]]; then
+            docker build -t ${{ secrets.DOCKER_USERNAME }}/lb_asg:qa .
+          elif [[ "${{ github.base_ref }}" == "main" ]]; then
+            docker build -t ${{ secrets.DOCKER_USERNAME }}/lb_asg:prod .
           fi
 
       - name: Push the Docker Image
         run: |
-          if [[ "${{github.base_ref}}" == "QA" ]]; then
-            docker push ${{secrets.DOCKER_USERNAME}}/lb_asg:qa
-          elif [[ "${{github.base_ref}}" == "main" ]]; then
-            docker push ${{secrets.DOCKER_USERNAME}}/lb_asg:prod
+          if [[ "${{ github.base_ref }}" == "QA" ]]; then
+            docker push ${{ secrets.DOCKER_USERNAME }}/lb_asg:qa
+          elif [[ "${{ github.base_ref }}" == "main" ]]; then
+            docker push ${{ secrets.DOCKER_USERNAME }}/lb_asg:prod
           fi
-      
+
       - name: Set Outputs for CD Pipeline
-        id: set-outputs
-        run: echo "base_ref=${{ github.base_ref }}" >> $GITHUB_ENV
+        id: set-output
+        run: echo "::set-output name=base_ref::${{ github.base_ref }}"
