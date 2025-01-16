@@ -56,14 +56,6 @@ jobs:
             exit 1
           fi
 
-      - name: Debug Environment Variables
-        run: |
-          echo "Environment: $env"
-          echo "Host: $host"
-          echo "Key Length: ${#key}" # Muestra la longitud del valor de la clave
-          echo "Image Tag: $image_tag"
-
-
       - name: Write Private Key to File
         run: |
           echo "${{ env.key_b64 }}" | base64 -d > /tmp/private_key.pem
