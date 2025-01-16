@@ -41,6 +41,7 @@ jobs:
 
       - name: Set Target Environment
         run: |
+        
           if [[ "${{ github.event.pull_request.base.ref }}" == "QA" ]]; then
             echo "env=QA" >> $GITHUB_ENV
             echo "host=${{ secrets.EC2_HOSTSQA }}" | tr -d '\n' >> $GITHUB_ENV
