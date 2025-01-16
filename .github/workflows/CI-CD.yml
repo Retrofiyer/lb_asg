@@ -44,26 +44,25 @@ jobs:
         
           if [[ "${{ github.event.pull_request.base.ref }}" == "QA" ]]; then
             echo "env=QA" >> $GITHUB_ENV
-            echo "host=${{ secrets.EC2_HOSTSQA }}" | tr -d '\n' >> $GITHUB_ENV
-            echo "key=${{ secrets.EC2_KEYQA }}" | tr -d '\n' >> $GITHUB_ENV
+            echo "host=${{ secrets.EC2_HOSTSQA }}" >> $GITHUB_ENV
+            echo "key=${{ secrets.EC2_KEYQA }}" >> $GITHUB_ENV
             echo "image_tag=qa" >> $GITHUB_ENV
           elif [[ "${{ github.event.pull_request.base.ref }}" == "main" ]]; then
             echo "env=PROD" >> $GITHUB_ENV
-            echo "host=${{ secrets.EC2_HOSTPROD }}" | tr -d '\n' >> $GITHUB_ENV
-            echo "key=${{ secrets.EC2_KEY }}" | tr -d '\n' >> $GITHUB_ENV
+            echo "host=${{ secrets.EC2_HOSTPROD }}" >> $GITHUB_ENV
+            echo "key=${{ secrets.EC2_KEY }}" >> $GITHUB_ENV
             echo "image_tag=prod" >> $GITHUB_ENV
           else
             echo "No valid branch detected for deployment."
             exit 1
           fi
 
-      - name: Deploy to Target Environment
-        uses: appleboy/ssh-action@v1.8.0
+      - name: SSH into EC2 and pull the latest Docker image
+        uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ env.host }}
+          host: ${{env.host}}
           username: ubuntu
-          key: ${{ env.key }}
-          port: 22
+          key: ${{env.key}}
           script: |
             if ! command -v docker &> /dev/null; then
               sudo apt update
@@ -72,6 +71,8 @@ jobs:
               sudo systemctl enable docker
               sudo usermod -aG docker $USER
               sudo systemctl restart docker
+            else
+              echo "Docker install"
             fi
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lb_asg:${{ env.image_tag }}
             sudo docker stop $(docker ps -q) || true
