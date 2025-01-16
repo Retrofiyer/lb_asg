@@ -63,6 +63,7 @@ jobs:
           host: ${{ env.host }}
           username: ubuntu
           key: ${{ env.key }}
+          port: 22
           script: |
             if ! command -v docker &> /dev/null; then
               sudo apt update
