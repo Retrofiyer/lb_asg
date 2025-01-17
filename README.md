@@ -80,32 +80,41 @@ git clone https://github.com/Retrofiyer/lb_asg.git
 
 ## 🎨 Preview:
 
-1. Within the AWS load balancer service, you can view those that were created for both QA and Production.
+**1.** The changes when making a pull request, you can see how the built image is sent to the DockerHub account linked to the GitHub secrets. 
+
+![image](https://github.com/user-attachments/assets/0455de21-2265-434a-82be-5ab3024be870)
+
+#### YOU CAN SEE THE IMAGEN IN THIS LINK - DOCKERHUB:
+
+https://hub.docker.com/r/retroandre/lb_asg
+
+
+**2.** Within the AWS load balancer service, you can view those that were created for both QA and Production.
 
 ![image](https://github.com/user-attachments/assets/ebeb88d4-d18a-4d8d-9d04-714146ab5a2d)
 
-2. On this page we can see the load balancer that we have for the production part. I
+**3.** On this page we can see the load balancer that we have for the production part. I
 
 ![image](https://github.com/user-attachments/assets/67b2d13f-b682-440f-adf3-ae4d75815be9)
 
-3. On this page you can view the Load Balancer for the QA part.
+**4.** On this page you can view the Load Balancer for the QA part.
 
 ![image](https://github.com/user-attachments/assets/4d355219-f9cb-43fb-b683-ec410f0b6233)
 
-4. You can view all EC2 instances that were created for both QA and production within your AWS account. Through any of these IPs you can access the display of the web page.
+**5.** You can view all EC2 instances that were created for both QA and production within your AWS account. Through any of these IPs you can access the display of the web page.
 
 ![image](https://github.com/user-attachments/assets/0fa04223-f88b-4bf8-99d2-33dff334d2cc)
 
 
-5. Within the AWS service, 2 target groups are created for both QA and Production.
+**6.** Within the AWS service, 2 target groups are created for both QA and Production.
 
 ![image](https://github.com/user-attachments/assets/8499a59c-9450-4bf4-9f78-e0a298aae408)
 
-6. The ASG is created that are necessary for the instances that relate to the production EC2s.
+**7.** The ASG is created that are necessary for the instances that relate to the production EC2s.
 
 ![image](https://github.com/user-attachments/assets/fe99b6fc-db29-47b8-87c0-ff283c001fb8)
 
-7. A launch template is created within AWS services.
+**8.** A launch template is created within AWS services.
 
 ![image](https://github.com/user-attachments/assets/43270beb-dae2-4520-a9f8-dec4fcb3b3ec)
 
